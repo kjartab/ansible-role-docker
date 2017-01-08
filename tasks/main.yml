@@ -1,0 +1,33 @@
+---
+
+- apt: update_cache=yes
+
+- apt: name={{item}}
+  with_items:
+    - apt-transport-https 
+    - ca-certificates
+
+- apt_key:
+    keyserver: hkp://ha.pool.sks-keyservers.net:80
+    id: 58118E89F3A912897C070ADBF76221572C52609D
+
+- apt_repository:
+    repo: deb https://apt.dockerproject.org/repo ubuntu-{{ansible_distribution_release}} main
+    state: present
+
+- apt: update_cache=yes
+
+- shell: uname -r
+  register: uname_res
+
+- debug: var=uname_res
+
+- apt: name=linux-image-extra-{{uname_res.stdout_lines[0]}}
+
+- apt: name=linux-image-extra-virtual
+
+- apt: update_cache=yes
+
+- apt: name=docker-engine
+
+- service: name=docker state=started enabled=true
